@@ -1,8 +1,16 @@
 {
   "home": {
     "title": "환영합니다",
-    "button": {
-      "ok": "확인"
+    "button": {}
+  },
+  "profile": {
+    "logout": {
+      "button": ""
+    }
+  },
+  "settings": {
+    "notification": {
+      "enabled": ""
     }
   }
 }

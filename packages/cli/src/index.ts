@@ -15,30 +15,49 @@ program
   .description("scan project & generate report")
   .option("--md", "output as markdown & save file")
   .option("--json", "output as json & save file")
+  .option("--no-save", "do not save report when using md/json")
   .option("--lang <code>", "base locale language", "en")
+  .option("--delete-unused", "delete unused keys")
+  .option("--create-missing", "create missing keys with placeholder")
+  .option(
+    "--locale <code>",
+    "apply fixes to only specific locale (default = ALL)"
+  )
   .action((options) => {
-    const { md, json, lang } = options;
+    const { md, json, lang, save, deleteUnused, createMissing, locale } =
+      options;
 
     console.log(chalk.blue("\n📦 Running i18n scan...\n"));
     console.log(chalk.cyan(`Base Locale: ${lang}\n`));
 
-    const locales = loadLocales(path.join(process.cwd(), "locales"));
-    const keys = scanCode(process.cwd());
-    const diff = analyzeDiff(locales, keys, lang);
+    const localesDir = path.join(process.cwd(), "locales");
+    const locales = loadLocales(localesDir);
+    const codeKeys = scanCode(process.cwd());
+    const diff = analyzeDiff(locales, codeKeys, lang);
 
+    // ---- 출력 ----
     if (md) {
       printMarkdown(diff);
-      saveMarkdown(diff);
-      return;
-    }
-
-    if (json) {
+      if (save !== false) saveMarkdown(diff);
+    } else if (json) {
       printJson(diff);
-      saveJson(diff);
-      return;
+      if (save !== false) saveJson(diff);
+    } else {
+      printPretty(diff);
     }
 
-    printPretty(diff);
+    // ---- 수정 ----
+    if (deleteUnused || createMissing) {
+      applyFixes({
+        diff,
+        baseLang: lang,
+        localesDir,
+        targetLocale: locale,
+        locales,
+        deleteUnused,
+        createMissing,
+      });
+    }
   });
 
 program.parse();
@@ -113,7 +132,7 @@ ${
   console.log(chalk.green(`\n💾 Markdown saved → ${filename}\n`));
 }
 
-/* ---------------- JSON Mode ---------------- */
+/* ---------------- JSON ---------------- */
 function printJson(diff: any) {
   console.log(JSON.stringify(diff, null, 2));
 }
@@ -122,4 +141,114 @@ function saveJson(diff: any) {
   const filename = "i18n-report.json";
   fs.writeFileSync(filename, JSON.stringify(diff, null, 2));
   console.log(chalk.green(`\n💾 JSON saved → ${filename}\n`));
+}
+
+/* ---------------- APPLY FIXES ---------------- */
+function applyFixes({
+  diff,
+  baseLang,
+  localesDir,
+  targetLocale,
+  locales,
+  deleteUnused,
+  createMissing,
+}: any) {
+  const targetLocales = targetLocale ? [targetLocale] : Object.keys(locales);
+
+  console.log(
+    chalk.magenta(
+      `\n🔧 Applying fixes to: ${targetLocale ? targetLocale : "ALL locales"}\n`
+    )
+  );
+
+  targetLocales.forEach((lang) => {
+    const filePath = path.join(localesDir, `${lang}.json`);
+    if (!fs.existsSync(filePath)) return;
+
+    const raw = fs.readFileSync(filePath, "utf-8");
+    let obj: any;
+    try {
+      obj = JSON.parse(raw);
+    } catch {
+      console.log(chalk.red(`⚠ Failed to parse ${lang}.json`));
+      return;
+    }
+
+    let deleted = 0;
+    let created = 0;
+
+    if (deleteUnused && diff.unused?.length) {
+      deleted = deleteUnusedKeys(obj, diff.unused);
+    }
+
+    if (createMissing && diff.missing?.length) {
+      created = createMissingKeys(
+        obj,
+        diff.missing,
+        lang === baseLang ? "" : ""
+      );
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(obj, null, 2));
+
+    if (deleteUnused)
+      console.log(chalk.green(`🧹 ${lang}: deleted ${deleted} unused`));
+    if (createMissing)
+      console.log(chalk.green(`✨ ${lang}: created ${created} missing`));
+  });
+}
+
+/* ---------------- Helpers ---------------- */
+function deleteUnusedKeys(root: any, unusedKeys: string[]) {
+  let count = 0;
+  unusedKeys.forEach((k) => {
+    const parts = k.split(".");
+    if (deletePath(root, parts)) count++;
+  });
+  return count;
+}
+
+function deletePath(obj: any, parts: string[]): boolean {
+  const [head, ...rest] = parts;
+  if (!obj || !(head in obj)) return false;
+
+  if (rest.length === 0) {
+    delete obj[head];
+    return true;
+  }
+
+  return deletePath(obj[head], rest);
+}
+
+function createMissingKeys(root: any, missing: string[], placeholder: any) {
+  let count = 0;
+
+  missing
+    .filter((k) => k && k.trim())
+    .forEach((k) => {
+      const parts = k.split(".").filter(Boolean);
+      if (createPath(root, parts, placeholder)) count++;
+    });
+
+  return count;
+}
+
+function createPath(obj: any, parts: string[], value: any): boolean {
+  const [head, ...rest] = parts;
+
+  if (!head) return false;
+
+  if (rest.length === 0) {
+    if (obj[head] === undefined) {
+      obj[head] = value;
+      return true;
+    }
+    return false;
+  }
+
+  if (typeof obj[head] !== "object" || obj[head] === null) {
+    obj[head] = {};
+  }
+
+  return createPath(obj[head], rest, value);
 }

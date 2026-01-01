@@ -1,8 +1,16 @@
 {
   "home": {
     "title": "Welcome",
-    "button": {
-      "ok": "OK"
+    "button": {}
+  },
+  "profile": {
+    "logout": {
+      "button": ""
+    }
+  },
+  "settings": {
+    "notification": {
+      "enabled": ""
     }
   }
 }

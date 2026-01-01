@@ -20,14 +20,13 @@ function flattenObject(obj: any, prefix = ""): LocaleMap {
   return result;
 }
 
-export function loadLocaleFile(filePath: string) {
+export function loadLocaleFile(filePath: string): LocaleMap {
   const json = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-  return flattenObject(json);
+  return flattenObject(json); // ✅ 여기서 flatten
 }
 
 export function loadLocales(localeDir: string) {
   const files = fs.readdirSync(localeDir);
-
   const result: Record<string, LocaleMap> = {};
 
   files.forEach((file: string) => {
@@ -36,7 +35,7 @@ export function loadLocales(localeDir: string) {
     const lang = path.basename(file, ".json");
     const fullPath = path.join(localeDir, file);
 
-    result[lang] = loadLocaleFile(fullPath);
+    result[lang] = loadLocaleFile(fullPath); // ✅ 이미 flat map
   });
 
   return result;
