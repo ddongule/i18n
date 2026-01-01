@@ -1,0 +1,47 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Monorepo package build
+packages/*/dist
+packages/*/build
+packages/*/*.tsbuildinfo
+
+# Logs
+logs
+*.log
+*.log.*
+log/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Cache
+.cache
+.tmp
+temp/
+tmp/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+
+# Lock
+package-lock.json
+yarn.lock

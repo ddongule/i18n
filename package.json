@@ -1,0 +1,11 @@
+{
+  "name": "i18n-mcp",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm --filter ./packages/cli dev"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

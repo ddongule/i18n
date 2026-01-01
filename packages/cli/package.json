@@ -1,0 +1,19 @@
+{
+  "name": "i18n-mcp-cli",
+  "bin": {
+    "i18n-mcp": "dist/index.js"
+  },
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "commander": "^14.0.2",
+    "i18n-mcp-core": "workspace:^"
+  }
+}
