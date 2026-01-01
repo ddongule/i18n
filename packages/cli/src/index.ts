@@ -242,8 +242,6 @@ function runConsistencyCheck(
   console.log(chalk.magenta("\n🌍 Locale Consistency Report\n"));
 
   Object.entries(locales).forEach(([lang, map]) => {
-    if (lang === baseLang) return;
-
     const keys = new Set(Object.keys(map));
     const missing: string[] = [];
     const extra: string[] = [];
@@ -336,6 +334,9 @@ function applyFixes(params: {
       created = createMissingKeysInObject(obj, diff.missing, "");
     }
 
+    // 🧹 remove empty objects
+    pruneEmptyObjects(obj);
+
     if (dryRun) {
       console.log(
         chalk.gray(
@@ -394,8 +395,6 @@ function fixLocaleStructure(params: {
   );
 
   targetLocales.forEach((lang) => {
-    if (lang === baseLang) return; // baseLang 자체는 구조 기준이므로 스킵(원하면 포함도 가능)
-
     const filePath = path.join(localesDir, `${lang}.json`);
     if (!fs.existsSync(filePath)) return;
 
@@ -424,6 +423,8 @@ function fixLocaleStructure(params: {
     if (missingRelativeToBase.length > 0) {
       created = createMissingKeysInObject(obj, missingRelativeToBase, "");
     }
+
+    pruneEmptyObjects(obj);
 
     if (dryRun) {
       console.log(
@@ -544,4 +545,17 @@ function askForConfirmation(question: string): Promise<boolean> {
       resolve(v === "y" || v === "yes");
     });
   });
+}
+
+function pruneEmptyObjects(obj: any): boolean {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  for (const key of Object.keys(obj)) {
+    if (typeof obj[key] === "object" && obj[key] !== null) {
+      const shouldDelete = pruneEmptyObjects(obj[key]);
+      if (shouldDelete) delete obj[key];
+    }
+  }
+
+  return Object.keys(obj).length === 0;
 }
