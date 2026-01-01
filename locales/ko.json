@@ -1,15 +1,18 @@
 {
   "home": {
-    "title": "환영합니다"
+    "title": "환영합니다",
+    "button": {
+      "ok": "확인"
+    }
   },
   "profile": {
     "logout": {
-      "button": ""
+      "button": "로그아웃"
     }
   },
   "settings": {
     "notification": {
-      "enabled": ""
+      "enabled": "활성화"
     }
   }
 }

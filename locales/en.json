@@ -1,15 +1,18 @@
 {
   "home": {
-    "title": "Welcome"
+    "title": "Welcome",
+    "button": {
+      "ok": "OK"
+    }
   },
   "profile": {
     "logout": {
-      "button": ""
+      "button": "Logout"
     }
   },
   "settings": {
     "notification": {
-      "enabled": ""
+      "enabled": "Enabled"
     }
   }
 }
