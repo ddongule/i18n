@@ -1,9 +1,6 @@
 {
   "home": {
-    "title": "Welcome",
-    "button": {
-      "ok": "OK"
-    }
+    "title": "Welcome"
   },
   "profile": {
     "logout": {
@@ -13,6 +10,16 @@
   "settings": {
     "notification": {
       "enabled": "Enabled"
+    }
+  },
+  "settings3": {
+    "notification": {
+      "enabled": ""
+    }
+  },
+  "settings4": {
+    "notification": {
+      "enabled": ""
     }
   }
 }

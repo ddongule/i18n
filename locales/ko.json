@@ -1,9 +1,6 @@
 {
   "home": {
-    "title": "환영합니다",
-    "button": {
-      "ok": "확인"
-    }
+    "title": "환영합니다"
   },
   "profile": {
     "logout": {
@@ -13,6 +10,16 @@
   "settings": {
     "notification": {
       "enabled": "활성화"
+    }
+  },
+  "settings3": {
+    "notification": {
+      "enabled": ""
+    }
+  },
+  "settings4": {
+    "notification": {
+      "enabled": ""
     }
   }
 }

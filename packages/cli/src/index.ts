@@ -7,6 +7,7 @@ const program = new Command();
 program.name("i18n-mcp").description("i18n automation tool").version("0.0.1");
 
 scanCommand(program);
+
 importCommand(program);
 
 program.parse();

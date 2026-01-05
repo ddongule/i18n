@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "glob": "^13.0.0",
+    "googleapis": "^169.0.0",
     "xlsx": "^0.18.5"
   }
 }

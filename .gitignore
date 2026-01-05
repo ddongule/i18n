@@ -45,3 +45,13 @@ coverage/
 # Lock
 package-lock.json
 yarn.lock
+
+
+# locales backup
+locales/.i18n-mcp-backup
+
+# Google Credentials
+credentials/
+google-credentials.json
+*.json
+!package.json

@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import path from "path";
-import { importSpreadsheet } from "i18n-mcp-core";
+import { importGoogleSheet, importSpreadsheet } from "i18n-mcp-core";
 
 export function importCommand(program: any) {
   program
@@ -9,9 +9,51 @@ export function importCommand(program: any) {
     .option("--file <path>", "xlsx file to import")
     .option("--override", "replace existing translations", false)
     .option("--dry-run", "simulate only", false)
-    .action(async (options: any) => {
-      const { file, override, dryRun } = options;
 
+    .option("--sheet <id>", "google sheet id")
+    .option("--sheet-name <name>", "Google Sheet tab name", "Sheet1")
+
+    .option(
+      "--cred <path>",
+      "google credentials path",
+      "./credentials/google-service-account.json"
+    )
+
+    .action(async (options: any) => {
+      const { file, sheet } = options;
+
+      //
+      // GOOGLE SHEET MODE
+      //
+      if (sheet) {
+        const range = options.range || `${options.sheetName}!A1:Z9999`;
+
+        console.log(
+          chalk.blue(
+            `\n📥 Importing from Google Sheet (${options.sheetName})...\n`
+          )
+        );
+
+        try {
+          await importGoogleSheet({
+            sheetId: options.sheet,
+            range,
+            credentialsPath: options.cred, // 🔥 FIX
+            dryRun: options.dryRun,
+          });
+
+          console.log(chalk.green("\n🎉 Google Sheet Import Completed!\n"));
+        } catch (e: any) {
+          console.error(chalk.red("\n❌ Google Sheet Import Failed\n"));
+          console.error(e?.message || e);
+        }
+
+        return;
+      }
+
+      //
+      // XLSX MODE
+      //
       if (!file) {
         console.log(chalk.red("❌ --file is required"));
         return;
@@ -24,10 +66,9 @@ export function importCommand(program: any) {
 
       try {
         await importSpreadsheet({
-          file: fullPath,
-          override,
-          dryRun,
-          localesDir: path.join(process.cwd(), "locales"),
+          file: options.file,
+          override: options.override,
+          dryRun: options.dryRun,
         });
 
         console.log(chalk.green("\n🎉 Import completed!\n"));

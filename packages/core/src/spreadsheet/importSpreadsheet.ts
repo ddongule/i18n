@@ -5,9 +5,9 @@ import { unflatten } from "../utils/objectTree"; // 이미 있거나 flatten 함
 
 export interface ImportSpreadsheetOptions {
   file: string;
-  localesDir: string;
   override?: boolean;
   dryRun?: boolean;
+  localesDir?: string;
 }
 
 export async function importSpreadsheet({
@@ -39,10 +39,13 @@ export async function importSpreadsheet({
     return;
   }
 
-  if (!fs.existsSync(localesDir)) fs.mkdirSync(localesDir, { recursive: true });
+  const localesDirPath = localesDir || path.join(process.cwd(), "locales");
+
+  if (!fs.existsSync(localesDirPath))
+    fs.mkdirSync(localesDirPath, { recursive: true });
 
   languages.forEach((lang) => {
-    const target = path.join(localesDir, `${lang}.json`);
+    const target = path.join(localesDirPath, `${lang}.json`);
 
     let existing = {};
     if (fs.existsSync(target) && !override) {
