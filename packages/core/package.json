@@ -1,5 +1,6 @@
 {
   "name": "i18n-mcp-core",
+  "private": true,
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
