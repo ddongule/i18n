@@ -1,0 +1,10 @@
+{
+  "name": "i18n-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.1",
+    "i18n-cli": "^0.1.0"
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "name": "i18n-mcp-cli",
+  "name": "i18n-cli",
   "bin": {
     "i18n-mcp": "dist/index.js"
   },

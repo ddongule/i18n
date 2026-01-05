@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import path from "path";
-import { importGoogleSheet, importSpreadsheet } from "i18n-mcp-core";
+import { importGoogleSheet } from "../../core/src/google/importGoogleSheet";
+import { importSpreadsheet } from "../../core/src/spreadsheet/importSpreadsheet";
 
 export function importCommand(program: any) {
   program
