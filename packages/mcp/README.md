@@ -2,15 +2,19 @@
 
 An MCP (Model Context Protocol) server that exposes i18n automation as **AI-callable tools**.
 
+It exposes both **AI-callable tools** and **read-only resources** so an agent can
+understand a project's i18n state once per session instead of re-scanning every time.
+
 Use it when you want ChatGPT/Cursor/Claude (or other MCP clients) to:
 
 - **Scan** i18n health
 - **Fix** missing/unused keys safely
-- **Import** translations from Google Sheets or XLSX
+- **Import / export** translations from Google Sheets
 - (Optional) **Create PRs** with changes
+- **Read** locale, namespace, and sync-status context as resources
 
-> This package is for AI integrations and requires an MCP client setup.
-> If you just want a normal CLI, use **i18n-cli**.
+> Published as **`@ddongule/i18n-mcp`**. This package is for AI integrations and
+> requires an MCP client setup. If you just want a normal CLI, use **@ddongule/i18n-cli**.
 
 ---
 
@@ -23,11 +27,14 @@ Use it when you want ChatGPT/Cursor/Claude (or other MCP clients) to:
   - [ChatGPT Desktop](#chatgpt-desktop)
   - [Cursor](#cursor)
   - [Claude Desktop](#claude-desktop)
-- [Tools (v1)](#tools-v1)
+- [Tools](#tools)
+  - [scan_i18n](#scan_i18n)
   - [fix_i18n](#fix_i18n)
   - [import_i18n_from_sheet](#import_i18n_from_sheet)
   - [export_i18n_to_sheet](#export_i18n_to_sheet)
   - [create_i18n_pr](#create_i18n_pr)
+- [Resources](#resources)
+- [Configuration](#configuration)
 - [Recommended Workflows](#recommended-workflows)
 - [Google Sheets Credentials](#google-sheets-credentials)
 - [Security Notes](#security-notes)
@@ -54,13 +61,13 @@ In practice:
 Use `npx`:
 
 ```bash
-npx i18n-mcp
+npx @ddongule/i18n-mcp
 ```
 
 Or install:
 
 ```bash
-pnpm add -D i18n-mcp
+pnpm add -D @ddongule/i18n-mcp
 ```
 
 ---
@@ -70,7 +77,7 @@ pnpm add -D i18n-mcp
 Most MCP clients use stdio transport, so you typically just point the client to:
 
 ```bash
-npx i18n-mcp
+npx @ddongule/i18n-mcp
 ```
 
 ---
@@ -86,7 +93,7 @@ Example MCP config:
   "mcpServers": {
     "i18n-mcp": {
       "command": "npx",
-      "args": ["-y", "i18n-mcp"]
+      "args": ["-y", "@ddongule/i18n-mcp"]
     }
   }
 }
@@ -101,7 +108,7 @@ In Cursor MCP settings:
   "mcpServers": {
     "i18n-mcp": {
       "command": "npx",
-      "args": ["-y", "i18n-mcp"]
+      "args": ["-y", "@ddongule/i18n-mcp"]
     }
   }
 }
@@ -116,17 +123,34 @@ Example:
   "mcpServers": {
     "i18n-mcp": {
       "command": "npx",
-      "args": ["-y", "i18n-mcp"]
+      "args": ["-y", "@ddongule/i18n-mcp"]
     }
   }
 }
 ```
 
-> Config locations differ by client/version. The key idea is to run `npx i18n-mcp` via stdio.
+> Config locations differ by client/version. The key idea is to run `npx @ddongule/i18n-mcp` via stdio.
 
 ---
 
-## Tools (v1)
+## Tools
+
+### scan_i18n
+
+Scan the project and report keys that are **missing** from the base locale or
+**unused** by the code. Read-only.
+
+**Input**
+
+- `baseLang` (string, default `en`)
+
+**Example**
+
+```json
+{ "name": "scan_i18n", "arguments": { "baseLang": "en" } }
+```
+
+---
 
 ### fix_i18n
 
@@ -140,6 +164,7 @@ Scan and optionally fix locale files.
 - `fixStructure` (boolean, default `false`)
 - `locale` (string, optional)
 - `apply` (boolean, default `false`) — when false, behaves like dry-run
+- `backup` (boolean, default `false`) — back up locale files before writing (only when `apply=true`)
 
 **Example**
 
@@ -166,10 +191,7 @@ Import translations into `./locales` from Google Sheets.
 
 - `sheetId` (string, required)
 - `sheetName` (string, default `Sheet1`)
-- `credentialsPath` (string, optional)
 - `dryRun` (boolean, default `false`)
-- `override` (boolean, default `false`)
-- `localesDir` (string, optional; default `./locales`)
 
 **Example**
 
@@ -179,8 +201,7 @@ Import translations into `./locales` from Google Sheets.
   "arguments": {
     "sheetId": "1L7h7Ra3hrOrp5MW7_uWV6ANNrBF0b9CgSfJ9hXy7D7w",
     "sheetName": "Translations",
-    "dryRun": true,
-    "override": false
+    "dryRun": true
   }
 }
 ```
@@ -195,9 +216,8 @@ Export locale JSON files to Google Sheets.
 
 - `sheetId` (string, required)
 - `sheetName` (string, default `Sheet1`)
-- `credentialsPath` (string, optional)
-- `dryRun` (boolean, default `false`)
 - `localesDir` (string, optional; default `./locales`)
+- `dryRun` (boolean, default `false`)
 
 **Example**
 
@@ -226,11 +246,66 @@ Create a GitHub pull request for locale changes.
 
 **Input**
 
-- `title` (string)
+- `title` (string, default `chore(i18n): fix translations`)
 - `body` (string)
 - `branch` (string, default `i18n/auto-fix`)
-- `base` (string, default `main`)
-- `localesDir` (string, default `./locales`)
+
+Commits the `locales` directory and opens a PR against `main`.
+
+---
+
+## Resources
+
+Read-only context an agent can load **once per session** instead of re-scanning
+every time. All return `application/json`.
+
+### `i18n://locales`
+
+Locale files present in the project and their key counts.
+
+```json
+{ "localesDir": "…/locales", "locales": [ { "locale": "en", "keyCount": 120 }, { "locale": "ko", "keyCount": 118 } ] }
+```
+
+### `i18n://namespaces`
+
+Top-level translation-key namespaces of the base locale.
+
+```json
+{ "baseLang": "en", "totalKeys": 120, "namespaces": [ { "namespace": "home", "keyCount": 8 }, { "namespace": "settings", "keyCount": 15 } ] }
+```
+
+### `i18n://status`
+
+Current missing / unused / out-of-sync summary from a fresh scan.
+
+```json
+{ "baseLang": "en", "totalLocaleKeys": 120, "totalCodeKeys": 122, "missingCount": 2, "unusedCount": 0, "inSync": false, "missingKeys": ["profile.logout.button"], "unusedKeys": [] }
+```
+
+---
+
+## Configuration
+
+The server operates on the client's working directory. Defaults can be
+overridden with environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `I18N_LOCALES_DIR` | `./locales` | Directory holding locale JSON files (absolute or relative to cwd) |
+| `I18N_BASE_LANG` | `en` | Base/reference locale |
+
+```json
+{
+  "mcpServers": {
+    "i18n-mcp": {
+      "command": "npx",
+      "args": ["-y", "@ddongule/i18n-mcp"],
+      "env": { "I18N_LOCALES_DIR": "src/locales", "I18N_BASE_LANG": "en" }
+    }
+  }
+}
+```
 
 ---
 

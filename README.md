@@ -9,7 +9,7 @@ Supports:
 - 🧹 Auto-fixing locale inconsistencies  
 - 📥 Importing translations from Google Sheets / XLSX  
 - 📦 CLI Tool  
-- 🚧 MCP integration (planned)
+- 🤖 MCP server (`@ddongule/i18n-mcp`) — AI-callable tools **and** resources
 
 Perfect for:
 - Frontend & Web Apps
@@ -172,11 +172,11 @@ Already ignored in `.gitignore`.
 
 ## 🧭 Roadmap
 
-- Export → Google Sheets
+- ✅ Export → Google Sheets
+- ✅ MCP server (tools + resources)
+- ✅ GitHub PR automation
 - Sync Mode (auto pull / push)
-- MCP Support
 - CI / CD Integration
-- GitHub PR automation
 
 ---
 

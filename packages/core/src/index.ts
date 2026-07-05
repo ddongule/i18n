@@ -4,3 +4,5 @@ export * from "./analyzer/diffAnalyzer";
 export * from "./spreadsheet/importSpreadsheet";
 export * from "./utils/objectTree";
 export * from "./google/importGoogleSheet";
+export * from "./google/exportGoogleSheet";
+export * from "./fixer/fixer";

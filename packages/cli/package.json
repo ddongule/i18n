@@ -29,6 +29,6 @@
   "dependencies": {
     "chalk": "^5",
     "commander": "^11",
-    "i18n-core": "workspace:*"
+    "i18n-mcp-core": "workspace:*"
   }
 }
